@@ -37,7 +37,7 @@ class AuthService{
             html: `
             <h1>Hola desde node.js</h1>
             <p>Este es un mail de verificacion</p>
-            <a href='http://localhost:8080/api/auth/verify-email/${verification_token}'>Verificar email</a>
+            <a href='${ENVIRONMENT.URL_API_BACKEND}/api/auth/verify-email/${verification_token}'>Verificar email</a>
             `
         })
 
