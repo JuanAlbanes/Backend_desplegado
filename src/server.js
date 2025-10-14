@@ -1,6 +1,8 @@
 import ENVIRONMENT from "./config/environment.config.js";
 import connectMongoDB from "./config/mongoDB.config.js";
 import workspace_router from "./routes/workspace.route.js";
+import channel_router from "./routes/channel.router.js";
+import message_router from "./routes/messages.router.js";
 
 /* 
 sing: Se usa para firmar tokens
@@ -43,6 +45,8 @@ app.use(express.json())
 
 app.use('/api/workspace', workspace_router)
 app.use('/api/auth', auth_router)
+app.use('/api/workspace' , channel_router)
+app.use('/api/channel' , message_router)
 
 //Constructor de middlewares
 const randomMiddleware = (min_numero_random) => {
