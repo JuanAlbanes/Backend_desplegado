@@ -35,8 +35,8 @@ class AuthService{
             to: email,
             subject: 'Verificacion de correo electronico',
             html: `
-            <h1>Hola desde node.js</h1>
-            <p>Este es un mail de verificacion</p>
+            <h1>Bienvenido a Slack Clon</h1>
+            <p>Este es un mail de verificacion, dale click al link de abajo</p>
             <a href='${ENVIRONMENT.URL_API_BACKEND}/api/auth/verify-email/${verification_token}'>Verificar email</a>
             `
         })
