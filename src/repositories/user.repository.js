@@ -38,7 +38,7 @@ class UserRepository {
         return user_updated
     }
         static async getByEmail (email){
-        const user = await Users.findOne({email: email})
+        const user = await Users.findOne({email: email} && {active: true})
         return user
     }
 }

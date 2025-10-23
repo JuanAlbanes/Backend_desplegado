@@ -31,7 +31,7 @@ class AuthService{
 
         //Enviar un mail de verificacion
             await transporter.sendMail({
-            from: 'juanutn999@gmail.com',
+            from: ENVIRONMENT.GMAIL_USERNAME,
             to: email,
             subject: 'Verificacion de correo electronico',
             html: `

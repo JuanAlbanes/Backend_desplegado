@@ -33,7 +33,7 @@ import auth_router from "./routes/auth.router.js";
 import UserRepository from "./repositories/user.repository.js";
 import cors from 'cors'
 import authMiddleware from "./middleware/auth.middleware.js";
-import MemberWorkspaceRepository from "./repositories/memeberWorkspace.repository.js";
+import MemberWorkspaceRepository from "./repositories/memberWorkspace.repository.js";
 
 
 
