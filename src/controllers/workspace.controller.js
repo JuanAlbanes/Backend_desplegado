@@ -1,15 +1,17 @@
+//Las funciones que se encargaran de manejar la consulta y la respuesta
+
+import ENVIRONMENT from "../config/environment.config.js"
+import transporter from "../config/mailer.config.js"
 import MemberWorkspaceRepository from "../repositories/memberWorkspace.repository.js"
+import UserRepository from "../repositories/user.repository.js"
 import WorkspacesRepository from "../repositories/workspace.repository.js"
 import { ServerError } from "../utils/customError.utils.js"
 import { validarId } from "../utils/validations.utils.js"
-import ENVIRONMENT from "../config/environment.config.js"
-import UserRepository from "../repositories/user.repository.js"
 import jwt from 'jsonwebtoken'
-import transporter from "../config/mailer.config.js"
 
 class WorkspaceController {
-        static async getAll(request, response) {
-            try {
+    static async getAll(request, response) {
+        try {
             const workspaces = await MemberWorkspaceRepository.getAllWorkspacesByUserId(request.user.id)
             response.json(
                 {
@@ -23,6 +25,7 @@ class WorkspaceController {
         }
         catch (error) {
             console.log(error)
+            //Evaluamos si es un error que nosotros definimos
             if (error.status) {
                 return response.status(error.status).json(
                     {
@@ -81,6 +84,7 @@ class WorkspaceController {
         }
         catch (error) {
             console.log(error)
+            //Evaluamos si es un error que nosotros definimos
             if (error.status) {
                 return response.status(error.status).json(
                     {
@@ -126,7 +130,14 @@ class WorkspaceController {
             }
             else {
                 //Creamos el workspace con el repository
-                await WorkspacesRepository.createWorkspace(name,url_img)
+                const workspace_id_created = await WorkspacesRepository.createWorkspace(name, url_img)
+                if (!workspace_id_created) {
+                    throw new ServerError(
+                        500,
+                        'Error al crear el workspace'
+                    )
+                }
+                await MemberWorkspaceRepository.create(request.user.id, workspace_id_created, 'admin')
                 //Si todo salio bien respondemos con {ok: true, message: 'Workspace creado con exito'}
                 return response.status(201).json({
                     ok: true,
@@ -245,6 +256,7 @@ class WorkspaceController {
             }
         }
     }
+
 
 }
 

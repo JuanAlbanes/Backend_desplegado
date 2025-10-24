@@ -38,7 +38,7 @@ class AuthController {
             response.json({
                 ok: true,
                 status: 200,
-                message: 'Usuario registrado con exito'
+                message: 'Usuario registrado con exito! Verifica el email y ya puedes loguearte'
             })
         }
         catch (error) {
