@@ -131,6 +131,9 @@ class WorkspaceController {
             else {
                 //Creamos el workspace con el repository
                 const workspace_id_created = await WorkspacesRepository.createWorkspace(name, url_img)
+                
+                console.log("Workspace creado con ID:", workspace_id_created)
+                
                 if (!workspace_id_created) {
                     throw new ServerError(
                         500,
@@ -197,12 +200,12 @@ class WorkspaceController {
                 id_invitador
             } CON JWT
             */
-            const id_inviter = member.id
+            const id_inviter = member._id
             const invite_token = jwt.sign(
                 {
-                    id_invited: user_invited.id,
+                    id_invited: user_invited._id,
                     email_invited: invited_email,
-                    id_workspace: workspace.id,
+                    id_workspace: workspace._id,
                     id_inviter: id_inviter
                 },
                 ENVIRONMENT.JWT_SECRET_KEY,
@@ -220,7 +223,7 @@ class WorkspaceController {
                     to: invited_email,
                     subject: 'Invitacion al workspace',
                     html: `<h1>El usuario: ${user.email} te ha enviado una invitación
-                            al workspace ${workspace.nombre}<h1/>
+                            al workspace ${workspace.name}<h1/> <!-- ✅ CORRECCIÓN: nombre → name -->
                 <a href='${ENVIRONMENT.URL_API_BACKEND}/api/members/confirm-invitation/${invite_token}'>Click para aceptar<a/>`
                 }
             )

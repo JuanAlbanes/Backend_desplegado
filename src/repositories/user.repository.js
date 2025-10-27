@@ -1,6 +1,5 @@
 import Users from "../models/User.model.js";
 
-
 class UserRepository {
     static async createUser(name, email, password){
         const result =  await Users.insertOne({
@@ -37,9 +36,22 @@ class UserRepository {
 
         return user_updated
     }
-        static async getByEmail (email){
+
+    static async getByEmail (email){
         const user = await Users.findOne({email: email})
         return user
+    }
+
+    static async updatePassword(email, newPassword) {
+        const user_updated = await Users.findOneAndUpdate(
+            { email: email },
+            { 
+                password: newPassword,
+                modified_at: new Date()
+            },
+            { new: true }
+        )
+        return user_updated
     }
 }
 

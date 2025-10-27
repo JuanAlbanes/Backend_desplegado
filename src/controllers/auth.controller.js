@@ -4,10 +4,6 @@ import { ServerError } from "../utils/customError.utils.js"
 class AuthController {
     static async register(request, response) {
         try {
-            /* 
-            Recibiremos un username, email, password
-            Validar los 3 campos
-            */
             const {
                 username, 
                 email, 
@@ -62,15 +58,11 @@ class AuthController {
                 )
             }
         }
-
     }
-        static async login(request, response) {
+
+    static async login(request, response) {
         try{
             const {email, password} = request.body
-
-            /* TAREA
-            - Validar que el email y password sean validas
-            */
             const { authorization_token } = await AuthService.login(email, password)
             return response.json({
                 ok: true,
@@ -104,17 +96,55 @@ class AuthController {
         }
     }
 
-        static async verifyEmail(request, response) {
+    static async verifyEmail(request, response) {
         try{
             const {verification_token} = request.params
             await AuthService.verifyEmail(verification_token)
+            return response.redirect(ENVIRONMENT.URL_FRONTEND + '/login')
+        } 
+        catch (error) {
+            console.log(error)
+            if (error.status) {
+                return response.status(error.status).json(
+                    {
+                        ok: false,
+                        status: error.status,
+                        message: error.message
+                    }
+                )
+            }
+            else {
+                return response.status(500).json(
+                    {
+                        ok: false,
+                        status: 500,
+                        message: 'Error interno del servidor'
+                    }
+                )
+            }
+        }
+    }
+
+    static async resetPassword(request, response) {
+        try{
+            const { email, newPassword } = request.body
+
+            // Validaciones
+            if(!email || !String(email).toLowerCase().match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)){
+                throw new ServerError(400, 'Debes enviar un email válido')
+            }
+            else if(!newPassword || newPassword.length < 8){
+                throw new ServerError(400, 'La nueva contraseña debe tener al menos 8 caracteres')
+            }
+
+            const result = await AuthService.resetPassword(email, newPassword)
 
             return response.json({
-                ok: true, 
+                ok: true,
                 status: 200,
-                message: 'Usuario validado'
+                message: result.message
             })
-        } 
+        }
         catch (error) {
             console.log(error)
             if (error.status) {
@@ -139,4 +169,4 @@ class AuthController {
     }
 }
 
-export default AuthController   
+export default AuthController

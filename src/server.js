@@ -34,6 +34,7 @@ import UserRepository from "./repositories/user.repository.js";
 import cors from 'cors'
 import authMiddleware from "./middleware/auth.middleware.js";
 import MemberWorkspaceRepository from "./repositories/memberWorkspace.repository.js";
+import member_router from "./routes/member.router.js";
 
 
 
@@ -47,6 +48,7 @@ app.use('/api/workspace', workspace_router)
 app.use('/api/auth', auth_router)
 app.use('/api/workspace' , channel_router)
 app.use('/api/channel' , message_router)
+app.use('/api/members' , member_router)
 
 //Constructor de middlewares
 const randomMiddleware = (min_numero_random) => {

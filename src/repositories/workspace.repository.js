@@ -5,11 +5,11 @@ class WorkspacesRepository {
         name, 
         url_image
     ){
-        await Workspaces.insertOne({
+        const result = await Workspaces.create({
             name: name,
             url_image: url_image
         })
-        return true
+        return result._id
         
     }
     static async getAll (){

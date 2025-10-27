@@ -9,19 +9,16 @@ class AuthService{
     static async register(username, password, email){
         console.log(username, password, email)
         
-        //Verificar que el usuario no este repetido
-            const user_found = await UserRepository.getByEmail(email)
+        const user_found = await UserRepository.getByEmail(email)
         if(user_found){
             throw new ServerError(400, 'Email ya en uso')
         } 
 
-        //Encriptar la contraseña
-            const password_hashed = await bcrypt.hash(password,12) 
+        const password_hashed = await bcrypt.hash(password,12) 
 
-        //guardarlo en la DB
         const user_created = await UserRepository.createUser(username, email, password_hashed)
 
-            const verification_token = jwt.sign(
+        const verification_token = jwt.sign(
             {
                 email: email,
                 user_id: user_created._id 
@@ -29,8 +26,7 @@ class AuthService{
             ENVIRONMENT.JWT_SECRET_KEY
         )
 
-        //Enviar un mail de verificacion
-            await transporter.sendMail({
+        await transporter.sendMail({
             from: ENVIRONMENT.GMAIL_USERNAME,
             to: email,
             subject: 'Verificacion de correo electronico',
@@ -40,21 +36,18 @@ class AuthService{
             <a href='${ENVIRONMENT.URL_API_BACKEND}/api/auth/verify-email/${verification_token}'>Verificar email</a>
             `
         })
-
     }
-        static async verifyEmail(verification_token){
+
+    static async verifyEmail(verification_token){
         try{
             const payload = jwt.verify(verification_token, ENVIRONMENT.JWT_SECRET_KEY)
-
             await UserRepository.updateById(
                 payload.user_id, 
                 {
                     verified_email: true
                 }
             )
-
             return 
-
         }
         catch(error){
             if(error instanceof jwt.JsonWebTokenError){
@@ -63,16 +56,8 @@ class AuthService{
             throw error
         }
     }
-        static async login(email, password){
-        /* 
-        - Buscar por email y guardar en una variable
-            - No se encontro: Tiramos error 404 'Email no registrado' / 'El email o la contraseña son invalidos'
-        - Usamos bcrypt.compare para checkear que la password recibida sea igual al hash guardado en DB
-            - En caso de que no sean iguales: 401 (Unauthorized) 'Contraseña invalida' / 'El email o la contraseña son invalidos'
-        - Generar el authorization_token con los datos que coinsideremos importantes para una sesion: (name, email, rol, created_at) (NO PASAR DATOS SENSIBLES)
-        - Retornar el token
-        */
 
+    static async login(email, password){
         const user = await UserRepository.getByEmail(email)
         if(!user){
             throw new ServerError(404, 'Email no registrado')
@@ -82,11 +67,11 @@ class AuthService{
             throw new ServerError(401, 'Email no verificado')
         }
         
-        /* Permite saber si cierto valor es igual a otro cierto valor encriptado */
         const is_same_password = await bcrypt.compare(password, user.password)
         if(!is_same_password){
             throw new ServerError(401, 'Contraseña incorrecta')
         }
+
         const authorization_token = jwt.sign(
             {
                 id: user._id,
@@ -103,7 +88,48 @@ class AuthService{
         return {
             authorization_token
         }
+    }
 
+    static async resetPassword(email, newPassword) {
+        // Validar que el usuario existe
+        const user = await UserRepository.getByEmail(email)
+        if(!user){
+            throw new ServerError(404, 'Email no registrado')
+        }
+
+        // Validar que el email esté verificado
+        if(!user.verified_email){
+            throw new ServerError(401, 'Debes verificar tu email antes de reestablecer la contraseña')
+        }
+
+        // Validar longitud de contraseña
+        if(!newPassword || newPassword.length < 8){
+            throw new ServerError(400, 'La contraseña debe tener al menos 8 caracteres')
+        }
+
+        // Hashear nueva contraseña
+        const newPasswordHashed = await bcrypt.hash(newPassword, 12)
+
+        // Actualizar contraseña en la base de datos
+        await UserRepository.updatePassword(email, newPasswordHashed)
+
+        await transporter.sendMail({
+            from: ENVIRONMENT.GMAIL_USERNAME,
+            to: email,
+            subject: 'Contraseña reestablecida - Slack Clon',
+            html: `
+            <h1>Contraseña reestablecida exitosamente</h1>
+            <p>Hola ${user.name},</p>
+            <p>Tu contraseña ha sido reestablecida exitosamente.</p>
+            <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</p>
+            <br/>
+            <p>Saludos,<br/>El equipo de Slack Clon</p>
+            `
+        })
+
+        return {
+            message: 'Contraseña reestablecida exitosamente'
+        }
     }
 }
 
