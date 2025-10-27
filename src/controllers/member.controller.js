@@ -21,7 +21,7 @@ class MemberController {
             El usuario viene via mail a este endpoint 
             Si todo esta bien, el endpoint lo redirecciona al frontend
             */
-            response.redirect(`${ENVIRONMENT.URL_FRONTEND}`)
+            response.redirect(`${ENVIRONMENT.URL_FRONTEND}`) 
         }
         catch (error) {
             console.log(error)

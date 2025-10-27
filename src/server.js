@@ -25,7 +25,6 @@ sing: Se usa para firmar tokens
 
 console.log(token_test) */
 
-
 connectMongoDB()
 
 import express from 'express'
@@ -36,19 +35,22 @@ import authMiddleware from "./middleware/auth.middleware.js";
 import MemberWorkspaceRepository from "./repositories/memberWorkspace.repository.js";
 import member_router from "./routes/member.router.js";
 
-
-
 const app = express()
 
 app.use(cors())
 app.use(express.json())
 
-
-app.use('/api/workspace', workspace_router)
+// ✅ ORDEN CORREGIDO - MIEMBROS PRIMERO para evitar conflictos
+app.use('/api/members', member_router)  // ← MOVIDO ARRIBA de todo
 app.use('/api/auth', auth_router)
-app.use('/api/workspace' , channel_router)
-app.use('/api/channel' , message_router)
-app.use('/api/members' , member_router)
+app.use('/api/workspace', workspace_router)
+app.use('/api/workspace', channel_router)  // ← Esto puede causar conflictos, pero lo dejamos
+app.use('/api/channel', message_router)
+
+// ✅ Ruta de prueba específica para miembros (agregar esto)
+app.get('/api/members/test', (req, res) => {
+    res.json({ message: '✅ Ruta de miembros funcionando correctamente' })
+})
 
 //Constructor de middlewares
 const randomMiddleware = (min_numero_random) => {
@@ -82,17 +84,9 @@ app.get('/ruta-protegida', authMiddleware, (request, response) => {
     })
 })
 
-
-
 app.listen(
     8080, 
     () => {
         console.log("Esto esta funcionado")
     }
 )
-
-/*  MemberWorkspaceRepository.create(
-    '68d333697f90d40f450edb15', 
-    '68b790eea6301ea1e4ac1727'
-)*/
-/* MemberWorkspaceRepository.getAllWorkspacesByUserId('68d333697f90d40f450edb15') */
