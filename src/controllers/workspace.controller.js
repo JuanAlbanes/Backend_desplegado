@@ -223,7 +223,7 @@ class WorkspaceController {
                     to: invited_email,
                     subject: 'Invitacion al workspace',
                     html: `<h1>El usuario: ${user.email} te ha enviado una invitación
-                            al workspace ${workspace.name}<h1/> <!-- ✅ CORRECCIÓN: nombre → name -->
+                            al workspace ${workspace.name}<h1/> 
                 <a href='${ENVIRONMENT.URL_API_BACKEND}/api/members/confirm-invitation/${invite_token}'>Click para aceptar<a/>`
                 }
             )

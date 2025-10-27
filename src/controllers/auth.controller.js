@@ -1,5 +1,6 @@
 import AuthService from "../services/auth.service.js"
 import { ServerError } from "../utils/customError.utils.js"
+import ENVIRONMENT from "../config/environment.config.js"
 
 class AuthController {
     static async register(request, response) {

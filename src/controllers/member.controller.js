@@ -13,6 +13,7 @@ class MemberController {
                 id_workspace,
                 id_inviter
             } = jwt.verify(token, ENVIRONMENT.JWT_SECRET_KEY)
+            console.log(id_invited,email_invited,id_workspace,id_inviter)
 
             await MemberWorkspaceRepository.create(id_invited, id_workspace, 'user')
 
