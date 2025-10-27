@@ -1,7 +1,6 @@
 import ENVIRONMENT from "./config/environment.config.js";
 import connectMongoDB from "./config/mongoDB.config.js";
 import workspace_router from "./routes/workspace.route.js";
-import channel_router from "./routes/channel.router.js";
 import message_router from "./routes/messages.router.js";
 
 /* 
@@ -40,20 +39,17 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// ✅ ORDEN CORREGIDO - MIEMBROS PRIMERO para evitar conflictos
-app.use('/api/members', member_router)  // ← MOVIDO ARRIBA de todo
+app.use('/api/members', member_router)  
 app.use('/api/auth', auth_router)
 app.use('/api/workspace', workspace_router)
-app.use('/api/workspace', channel_router)  // ← Esto puede causar conflictos, pero lo dejamos
 app.use('/api/channel', message_router)
 
-// ✅ Ruta de prueba específica para miembros (agregar esto)
+
 app.get('/api/members/test', (req, res) => {
-    res.json({ message: '✅ Ruta de miembros funcionando correctamente' })
+    res.json({ message: 'Ruta de miembros funcionando correctamente' })
 })
 
-//Constructor de middlewares
-const randomMiddleware = (min_numero_random) => {
+/* const randomMiddleware = (min_numero_random) => {
     return (request, response, next) =>{
         const numero_random = Math.random()
         if(numero_random < min_numero_random){
@@ -64,18 +60,18 @@ const randomMiddleware = (min_numero_random) => {
             next()
         }
     }
-}
+} */
 
 /* 
  */
 //Personalizar el randomMiddleware para que podamos configurar el numero minimo de suerte (0.5 por defecto)
-
+/* 
 app.get('/test',  randomMiddleware(0.9), (request, response) => {
     console.log(request.tieneSuerte)
     response.send({
         ok: true
     })
-})
+}) */
 
 app.get('/ruta-protegida', authMiddleware, (request, response) => {
     console.log(request.user)
