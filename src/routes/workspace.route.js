@@ -14,12 +14,11 @@ workspace_router.use(authMiddleware)
 
 workspace_router.get('/',  WorkspaceController.getAll )
 
-<<<<<<< HEAD
+
 //Nueva ruta para obtener TODOS los workspaces sin filtrar
 workspace_router.get('/all',  WorkspaceController.getAllWorkspaces )
 
-=======
->>>>>>> f19d43587651dedf8a37e1af262f29c431debe55
+
 
 workspace_router.get('/:workspace_id', /* workspaceMiddleware(['admin']) */ WorkspaceController.getById )
 
