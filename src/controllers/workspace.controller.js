@@ -48,6 +48,7 @@ class WorkspaceController {
 
     }
 
+<<<<<<< HEAD
     static async getAllWorkspaces(request, response) {
         try {
             // Obtener TODOS los workspaces sin filtrar por usuario
@@ -87,6 +88,8 @@ class WorkspaceController {
         }
     }
 
+=======
+>>>>>>> f19d43587651dedf8a37e1af262f29c431debe55
     static async getById(request, response) {
         try {
             const workspace_id = request.params.workspace_id
