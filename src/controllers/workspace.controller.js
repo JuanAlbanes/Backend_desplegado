@@ -1,5 +1,3 @@
-//Las funciones que se encargaran de manejar la consulta y la respuesta
-
 import ENVIRONMENT from "../config/environment.config.js"
 import transporter from "../config/mailer.config.js"
 import MemberWorkspaceRepository from "../repositories/memberWorkspace.repository.js"
@@ -215,8 +213,10 @@ class WorkspaceController {
 
     static async inviteMember(request, response) {
         try {
+
             const { member, workspace, user } = request
             const { invited_email } = request.body
+
 
             //Buscar al usuario y validar que exista y este activo
             const user_invited = await UserRepository.getByEmail(invited_email)
@@ -233,12 +233,6 @@ class WorkspaceController {
                 throw new ServerError(409, `Usuario con email ${invited_email} ya es miembro del workspace`)
             }
 
-            /* Crear un token con {
-                id_invitado,
-                id_workspace,
-                id_invitador
-            } CON JWT
-            */
             const id_inviter = member._id
             const invite_token = jwt.sign(
                 {
@@ -253,6 +247,7 @@ class WorkspaceController {
                 }
             )
 
+        console.log('Enviando email...');
             //Enviar mail de invitacion al usuario invitado
 
 
@@ -276,7 +271,6 @@ class WorkspaceController {
 
         }
         catch (error) {
-            console.log(error)
             //Evaluamos si es un error que nosotros definimos
             if (error.status) {
                 return response.status(error.status).json(

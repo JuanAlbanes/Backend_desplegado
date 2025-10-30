@@ -12,6 +12,7 @@ import { ServerError } from "../utils/customError.utils.js"
 function workspaceMiddleware(valid_member_roles = []) {
     return async function (request, response, next) {
         try {
+
             //porque digo que request.user contiene datos del usuario?
             //HOT POINT
             //Reobtengo los datos de sesion (id, email del usuario consultante)
