@@ -34,11 +34,6 @@ import authMiddleware from "./middleware/auth.middleware.js";
 import MemberWorkspaceRepository from "./repositories/memberWorkspace.repository.js";
 import member_router from "./routes/member.router.js";
 
-/* CONSOLE DEBUG A BORRAR */
-console.log('=== VERIFICACIÓN DE VARIABLES DE ENTORNO ===');
-console.log('JWT_SECRET_KEY existe?:', !!ENVIRONMENT.JWT_SECRET_KEY);
-console.log('JWT_SECRET_KEY longitud:', ENVIRONMENT.JWT_SECRET_KEY ? ENVIRONMENT.JWT_SECRET_KEY.length : 'No definida');
-console.log('URL_FRONTEND:', ENVIRONMENT.URL_FRONTEND);
 
 const app = express()
 

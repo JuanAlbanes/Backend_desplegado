@@ -14,7 +14,7 @@ const MemberWorkspaceSchema = new mongoose.Schema(
         },
         role: {
             type:String,
-            enum:['admin', 'member'],
+            enum:['admin', 'member', 'user'],
             default:'member'
         },
         created_at: {
