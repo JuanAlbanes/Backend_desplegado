@@ -147,48 +147,52 @@ class WorkspaceController {
 
     static async post(request, response) {
         try {
-
-            //request.body es donde esta la carga util enviada por el cliente
-            //si aplicamos express.json() en nuestra app body siempre sera de tipo objeto
+            // Usar url_image que es el nombre correcto según el modelo
             const name = request.body.name
-            const url_img = request.body.url_img
-            //Validar que name este y que sea valido (por ejemplo un string no VACIO de no mas de 30 caracteres)
+            const url_image = request.body.url_image || request.body.url_img // Soporta ambos por compatibilidad
+            
+            // Validar name
             if (!name || typeof (name) !== 'string' || name.length > 30) {
                 throw new ServerError(
                     400,
                     "el campo 'name' debe ser un string de menos de 30 caracteres"
                 )
             }
-            else if (!url_img || typeof (url_img) !== 'string') {
+            
+            // Validar url_image (ahora opcional y con longitud más realista)
+            if (url_image && typeof (url_image) !== 'string') {
                 throw new ServerError(
                     400,
-                    "el campo 'url_img' debe ser un string de menos de 30 caracteres"
+                    "el campo 'url_image' debe ser un string"
                 )
             }
-            else {
-                //Creamos el workspace con el repository
-                const workspace_id_created = await WorkspacesRepository.createWorkspace(name, url_img)
-                
-                console.log("Workspace creado con ID:", workspace_id_created)
-                
-                if (!workspace_id_created) {
-                    throw new ServerError(
-                        500,
-                        'Error al crear el workspace'
-                    )
-                }
-                await MemberWorkspaceRepository.create(request.user.id, workspace_id_created, 'admin')
-                //Si todo salio bien respondemos con {ok: true, message: 'Workspace creado con exito'}
-                return response.status(201).json({
-                    ok: true,
-                    status: 201,
-                    message: 'Workspace creado con exito'
-                })
+            
+            // Crear el workspace con el nombre de campo correcto
+            const workspace_id_created = await WorkspacesRepository.createWorkspace(
+                name, 
+                url_image, // ← Campo corregido
+                request.user.id
+            )
+            
+            console.log("Workspace creado con ID:", workspace_id_created)
+            
+            if (!workspace_id_created) {
+                throw new ServerError(
+                    500,
+                    'Error al crear el workspace'
+                )
             }
+            
+            await MemberWorkspaceRepository.create(request.user.id, workspace_id_created, 'admin')
+            
+            return response.status(201).json({
+                ok: true,
+                status: 201,
+                message: 'Workspace creado con exito'
+            })
         }
         catch (error) {
             console.log(error)
-            //Evaluamos si es un error que nosotros definimos
             if (error.status) {
                 return response.status(error.status).json(
                     {
@@ -208,15 +212,122 @@ class WorkspaceController {
                 )
             }
         }
+    }
 
+    static async update(request, response) {
+        try {
+            const workspace_id = request.params.workspace_id
+            const { name, url_image } = request.body
+            const user_id = request.user.id
+
+            if (validarId(workspace_id)) {
+                // Verificar que el usuario es admin del workspace
+                const member = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, workspace_id)
+                
+                if (!member || member.role !== 'admin') {
+                    throw new ServerError(403, 'No tienes permisos para actualizar este workspace')
+                }
+
+                // Validar campos
+                if (name && (typeof name !== 'string' || name.length > 30)) {
+                    throw new ServerError(400, "el campo 'name' debe ser un string de menos de 30 caracteres")
+                }
+
+                if (url_image && typeof url_image !== 'string') {
+                    throw new ServerError(400, "el campo 'url_image' debe ser un string")
+                }
+
+                const updatedWorkspace = await WorkspacesRepository.update(workspace_id, { name, url_image })
+                
+                if (!updatedWorkspace) {
+                    throw new ServerError(404, `Workspace con id ${workspace_id} no encontrado`)
+                }
+
+                return response.json({
+                    ok: true,
+                    message: 'Workspace actualizado correctamente',
+                    data: {
+                        workspace: updatedWorkspace
+                    }
+                })
+            }
+            else {
+                throw new ServerError(400, 'el workspace_id debe ser un id valido')
+            }
+        }
+        catch (error) {
+            console.log(error)
+            if (error.status) {
+                return response.status(error.status).json({
+                    ok: false,
+                    status: error.status,
+                    message: error.message
+                })
+            }
+            else {
+                return response.status(500).json({
+                    ok: false,
+                    status: 500,
+                    message: 'Error interno del servidor'
+                })
+            }
+        }
+    }
+
+    static async delete(request, response) {
+        try {
+            const workspace_id = request.params.workspace_id
+            const user_id = request.user.id
+
+            if (validarId(workspace_id)) {
+                // Verificar que el usuario es admin del workspace
+                const member = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, workspace_id)
+                
+                if (!member || member.role !== 'admin') {
+                    throw new ServerError(403, 'No tienes permisos para eliminar este workspace')
+                }
+
+                const deletedWorkspace = await WorkspacesRepository.delete(workspace_id)
+                
+                if (!deletedWorkspace) {
+                    throw new ServerError(404, `Workspace con id ${workspace_id} no encontrado`)
+                }
+
+                return response.json({
+                    ok: true,
+                    message: 'Workspace eliminado correctamente',
+                    data: {
+                        workspace: deletedWorkspace
+                    }
+                })
+            }
+            else {
+                throw new ServerError(400, 'el workspace_id debe ser un id valido')
+            }
+        }
+        catch (error) {
+            console.log(error)
+            if (error.status) {
+                return response.status(error.status).json({
+                    ok: false,
+                    status: error.status,
+                    message: error.message
+                })
+            }
+            else {
+                return response.status(500).json({
+                    ok: false,
+                    status: 500,
+                    message: 'Error interno del servidor'
+                })
+            }
+        }
     }
 
     static async inviteMember(request, response) {
         try {
-
             const { member, workspace, user } = request
             const { invited_email } = request.body
-
 
             //Buscar al usuario y validar que exista y este activo
             const user_invited = await UserRepository.getByEmail(invited_email)
@@ -224,6 +335,7 @@ class WorkspaceController {
             if (!user_invited) {
                 throw new ServerError(404, 'Usuario no encontrado')
             }
+            
             //Verificar que NO es miembro actual de ese workspace 
             const member_data = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(
                 user_invited._id, workspace._id
@@ -247,9 +359,8 @@ class WorkspaceController {
                 }
             )
 
-        console.log('Enviando email...');
+            console.log('Enviando email...');
             //Enviar mail de invitacion al usuario invitado
-
 
             await transporter.sendMail(
                 {
@@ -292,8 +403,6 @@ class WorkspaceController {
             }
         }
     }
-
-
 }
 
 export default WorkspaceController

@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const channelMessageSchema = new mongoose.Schema(
     {
-        member: {
+        user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Member',
+            ref: 'User',
             required: true
         },
         channel: {

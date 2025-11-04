@@ -12,6 +12,11 @@ const workspaceSchema = new mongoose.Schema(
         url_image: {
             type: String,
         },
+        admin: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
         modified_at: {
             type: Date,
             default: null

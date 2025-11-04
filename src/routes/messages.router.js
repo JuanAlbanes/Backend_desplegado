@@ -1,30 +1,24 @@
 import express from "express";
-import MessageRepository from "../repositories/channelMessage.repository.js";
+import MessageController from "../controllers/message.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
 const message_router = express.Router();
 
-message_router.get("/:channelId/messages", authMiddleware, async (req, res) => {
-    try {
-        const { channelId } = req.params;
-        const messages = await MessageRepository.getAllByChannel(channelId);
-        res.status(200).json(messages);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al obtener mensajes" });
-    }
-});
+message_router.use(authMiddleware);
 
-message_router.post("/:channelId/messages", authMiddleware, async (req, res) => {
-    try {
-        const { channelId } = req.params;
-        const { text } = req.body;
-        const userId = req.user.id;
-        const newMessage = await MessageRepository.create(channelId, userId, text);
-        res.status(201).json(newMessage);
-    } catch (error) {
-        res.status(500).json({ message: "Error al enviar mensaje" });
-    }
-});
+// Obtener todos los mensajes de un canal
+message_router.get("/channel/:channel_id", MessageController.getAllByChannel);
+
+// Obtener mensaje por ID
+message_router.get("/:message_id", MessageController.getById);
+
+// Crear mensaje en un canal
+message_router.post("/", MessageController.post);
+
+// Actualizar mensaje
+message_router.put("/:message_id", MessageController.update);
+
+// Eliminar mensaje
+message_router.delete("/:message_id", MessageController.delete);
 
 export default message_router;

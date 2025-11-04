@@ -1,29 +1,25 @@
 import express from "express";
-import ChannelRepository from "../repositories/channel.repository.js";
+import ChannelController from "../controllers/channel.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
+import workspaceMiddleware from "../middleware/workspace.middleware.js";
 
 const channel_router = express.Router();
 
-channel_router.get("/:workspaceId/channels", authMiddleware, async (req, res) => {
-    try {
-        const { workspaceId } = req.params;
-        const channels = await ChannelRepository.getAllByWorkspace(workspaceId);
-        res.status(200).json(channels);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al obtener canales" });
-    }
-});
+channel_router.use(authMiddleware);
 
-channel_router.post("/:workspaceId/channels", authMiddleware, async (req, res) => {
-    try {
-        const { workspaceId } = req.params;
-        const { name } = req.body;
-        const newChannel = await ChannelRepository.create(workspaceId, name);
-        res.status(201).json(newChannel);
-    } catch (error) {
-        res.status(500).json({ message: "Error al crear canal" });
-    }
-});
+// Obtener todos los canales de un workspace
+channel_router.get("/workspace/:workspace_id", ChannelController.getAllByWorkspace);
+
+// Obtener canal por ID
+channel_router.get("/:channel_id", ChannelController.getById);
+
+// Crear canal en un workspace
+channel_router.post("/", ChannelController.post);
+
+// Actualizar canal
+channel_router.put("/:channel_id", ChannelController.update);
+
+// Eliminar canal
+channel_router.delete("/:channel_id", ChannelController.delete);
 
 export default channel_router;

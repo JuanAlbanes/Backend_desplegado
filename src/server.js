@@ -42,7 +42,7 @@ app.use(express.json())
 
 app.use('/api/members', member_router)  
 app.use('/api/auth', auth_router)
-app.use('/api/workspace', workspace_router)
+app.use('/api/workspaces', workspace_router)
 app.use('/api/channel', message_router)
 
 

@@ -6,31 +6,29 @@ import WorkspaceController from '../controllers/workspace.controller.js'
 import authMiddleware from '../middleware/auth.middleware.js'
 import workspaceMiddleware from '../middleware/workspace.middleware.js'
 
-
 const workspace_router = express.Router()
 
 workspace_router.use(authMiddleware)
 
+// Obtener workspaces del usuario actual
+workspace_router.get('/', WorkspaceController.getAll)
 
-workspace_router.get('/',  WorkspaceController.getAll )
+// Obtener TODOS los workspaces sin filtrar
+workspace_router.get('/all', WorkspaceController.getAllWorkspaces)
 
+// Obtener workspace por ID
+workspace_router.get('/:workspace_id', WorkspaceController.getById)
 
-//Nueva ruta para obtener TODOS los workspaces sin filtrar
-workspace_router.get('/all',  WorkspaceController.getAllWorkspaces )
+// Crear workspace (cualquier usuario autenticado puede crear)
+workspace_router.post('/', WorkspaceController.post)
 
+// Actualizar workspace (solo admin)
+workspace_router.put('/:workspace_id', workspaceMiddleware(['admin']), WorkspaceController.update)
 
+// Eliminar workspace (solo admin)
+workspace_router.delete('/:workspace_id', workspaceMiddleware(['admin']), WorkspaceController.delete)
 
-workspace_router.get('/:workspace_id', /* workspaceMiddleware(['admin']) */ WorkspaceController.getById )
-
-//Crear el WorkspaceController con los metodos .post, .getById, getAll
-
-//Este es el endpoint para crear workspaces
-workspace_router.post('/:workspace_id/invite', authMiddleware , workspaceMiddleware(['admin']), WorkspaceController.inviteMember)
-
-
-workspace_router.post('/' ,  WorkspaceController.post)
-
-
-
+// Invitar miembro al workspace (solo admin)
+workspace_router.post('/:workspace_id/invite', workspaceMiddleware(['admin']), WorkspaceController.inviteMember)
 
 export default workspace_router
