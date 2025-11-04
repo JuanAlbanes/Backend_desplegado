@@ -11,6 +11,12 @@ class WorkspaceController {
     static async getAll(request, response) {
         try {
             const workspaces = await MemberWorkspaceRepository.getAllWorkspacesByUserId(request.user.id)
+            
+            // ✅ CORREGIDO: Verificar que workspaces no sea undefined
+            if (!workspaces) {
+                throw new ServerError(404, 'No se encontraron workspaces para el usuario')
+            }
+            
             response.json(
                 {
                     status: 'OK',
@@ -22,7 +28,7 @@ class WorkspaceController {
             )
         }
         catch (error) {
-            console.log(error)
+            console.log('Error en WorkspaceController.getAll:', error)
             //Evaluamos si es un error que nosotros definimos
             if (error.status) {
                 return response.status(error.status).json(
@@ -62,7 +68,7 @@ class WorkspaceController {
             )
         }
         catch (error) {
-            console.log(error)
+            console.log('Error en WorkspaceController.getAllWorkspaces:', error)
             //Evaluamos si es un error que nosotros definimos
             if (error.status) {
                 return response.status(error.status).json(
@@ -120,7 +126,7 @@ class WorkspaceController {
             }
         }
         catch (error) {
-            console.log(error)
+            console.log('Error en WorkspaceController.getById:', error)
             //Evaluamos si es un error que nosotros definimos
             if (error.status) {
                 return response.status(error.status).json(
@@ -183,7 +189,12 @@ class WorkspaceController {
                 )
             }
             
-            await MemberWorkspaceRepository.create(request.user.id, workspace_id_created, 'admin')
+            // ✅ CORREGIDO: Verificar que la creación del miembro fue exitosa
+            const memberCreated = await MemberWorkspaceRepository.create(request.user.id, workspace_id_created, 'admin')
+            
+            if (!memberCreated) {
+                throw new ServerError(500, 'Error al agregar usuario como admin del workspace')
+            }
             
             return response.status(201).json({
                 ok: true,
@@ -192,7 +203,7 @@ class WorkspaceController {
             })
         }
         catch (error) {
-            console.log(error)
+            console.log('Error en WorkspaceController.post:', error)
             if (error.status) {
                 return response.status(error.status).json(
                     {
@@ -234,7 +245,7 @@ class WorkspaceController {
                 }
 
                 if (url_image && typeof url_image !== 'string') {
-                    throw new ServerError(400, "el campo 'url_image' debe ser un string")
+                    throw new Error(400, "el campo 'url_image' debe ser un string")
                 }
 
                 const updatedWorkspace = await WorkspacesRepository.update(workspace_id, { name, url_image })
@@ -256,7 +267,7 @@ class WorkspaceController {
             }
         }
         catch (error) {
-            console.log(error)
+            console.log('Error en WorkspaceController.update:', error)
             if (error.status) {
                 return response.status(error.status).json({
                     ok: false,
@@ -306,7 +317,7 @@ class WorkspaceController {
             }
         }
         catch (error) {
-            console.log(error)
+            console.log('Error en WorkspaceController.delete:', error)
             if (error.status) {
                 return response.status(error.status).json({
                     ok: false,
@@ -382,6 +393,7 @@ class WorkspaceController {
 
         }
         catch (error) {
+            console.log('Error en WorkspaceController.inviteMember:', error)
             //Evaluamos si es un error que nosotros definimos
             if (error.status) {
                 return response.status(error.status).json(

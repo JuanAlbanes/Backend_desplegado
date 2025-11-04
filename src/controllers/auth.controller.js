@@ -10,7 +10,7 @@ class AuthController {
                 email, 
                 password
             } = request.body
-            console.log(request.body)
+            console.log('Register request body:', request.body)
 
             if(!username){
                 throw new ServerError(
@@ -39,7 +39,7 @@ class AuthController {
             })
         }
         catch (error) {
-            console.log(error)
+            console.log('Error en AuthController.register:', error)
             if (error.status) {
                 return response.status(error.status).json(
                     {
@@ -64,7 +64,19 @@ class AuthController {
     static async login(request, response) {
         try{
             const {email, password} = request.body
+            
+            // ✅ CORREGIDO: Validar campos requeridos
+            if (!email || !password) {
+                throw new ServerError(400, 'Email y contraseña son requeridos')
+            }
+            
             const { authorization_token } = await AuthService.login(email, password)
+            
+            // ✅ CORREGIDO: Verificar que el token se generó correctamente
+            if (!authorization_token) {
+                throw new ServerError(500, 'Error al generar el token de autorización')
+            }
+            
             return response.json({
                 ok: true,
                 message: 'Logueado con exito',
@@ -75,7 +87,7 @@ class AuthController {
             })
         }
         catch (error) {
-            console.log(error)
+            console.log('Error en AuthController.login:', error)
             if (error.status) {
                 return response.status(error.status).json(
                     {
@@ -104,7 +116,7 @@ class AuthController {
             return response.redirect(ENVIRONMENT.URL_FRONTEND + '/login')
         } 
         catch (error) {
-            console.log(error)
+            console.log('Error en AuthController.verifyEmail:', error)
             if (error.status) {
                 return response.status(error.status).json(
                     {
@@ -147,7 +159,7 @@ class AuthController {
             })
         }
         catch (error) {
-            console.log(error)
+            console.log('Error en AuthController.resetPassword:', error)
             if (error.status) {
                 return response.status(error.status).json(
                     {

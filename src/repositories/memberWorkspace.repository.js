@@ -3,35 +3,46 @@ import MemberWorkspace from "../models/MemberWorkspace.model.js";
 import { ServerError } from "../utils/customError.utils.js";
 
 class MemberWorkspaceRepository {
-    static async getAllWorkspacesByUserId (user_id){
+    static async getAllWorkspacesByUserId(user_id) {
         const workspaces_que_soy_miembro = await MemberWorkspace
-        .find({user: user_id})
-        .populate({
-            path: 'workspace',
-            match: {active: true}
-        }) 
+            .find({ user: user_id })
+            .populate({
+                path: 'workspace',
+                match: { active: true }
+            })
+            .exec();
 
-        console.log(workspaces_que_soy_miembro)
+        // ✅ CORREGIDO: Filtrar workspaces que existen (no null) y retornar
+        const validWorkspaces = workspaces_que_soy_miembro.filter(member => member.workspace !== null);
+        
+        console.log('Workspaces del usuario:', validWorkspaces);
+        return validWorkspaces;
     }
 
-    static async getMemberWorkspaceByUserIdAndWorkspaceId(user_id, workspace_id){
-        const member_workspace = await MemberWorkspace.findOne({user: user_id, workspace: workspace_id})
-        return member_workspace
-    } 
-/* 
-        static async getMemberWorkspaceByUserIdAndWorkspaceId(user_id, workspace_id) {
-        const query = `SELECT * FROM ${MEMBER_WORKSPACE_TABLE.NAME} WHERE ${MEMBER_WORKSPACE_TABLE.COLUMNS.FK_USER} = ? AND ${MEMBER_WORKSPACE_TABLE.COLUMNS.FK_WORKSPACE} = ?`
-        const [result] = await pool.execute(query, [user_id, workspace_id])
-        return result[0]
-    } */
+    static async getMemberWorkspaceByUserIdAndWorkspaceId(user_id, workspace_id) {
+        const member_workspace = await MemberWorkspace.findOne({ 
+            user: user_id, 
+            workspace: workspace_id 
+        });
+        return member_workspace;
+    }
 
-    static async create (user_id, workspace_id, role = 'member'){
-        const member = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, workspace_id)
-        if(member){
-            throw new ServerError(400, 'El usuario ya es miembro del workspace')
+    static async create(user_id, workspace_id, role = 'member') {
+        const member = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, workspace_id);
+        
+        if (member) {
+            throw new ServerError(400, 'El usuario ya es miembro del workspace');
         }
-        await MemberWorkspace.insertOne({user: user_id, workspace: workspace_id, role: role})
+        
+        // ✅ CORREGIDO: Usar create() en lugar de insertOne()
+        const newMember = await MemberWorkspace.create({
+            user: user_id,
+            workspace: workspace_id,
+            role: role
+        });
+        
+        return newMember;
     }
 }
 
-export default MemberWorkspaceRepository
+export default MemberWorkspaceRepository;
