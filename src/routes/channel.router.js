@@ -1,10 +1,10 @@
 import express from "express";
 import ChannelController from "../controllers/channel.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
-import workspaceMiddleware from "../middleware/workspace.middleware.js";
 
 const channel_router = express.Router();
 
+// Aplicar autenticación a todas las rutas
 channel_router.use(authMiddleware);
 
 // Obtener todos los canales de un workspace

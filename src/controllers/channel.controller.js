@@ -19,7 +19,6 @@ class ChannelController {
                 throw new ServerError(404, `No existe un workspace con id ${workspace_id}`)
             }
 
-            // Verificar que el usuario es miembro del workspace
             const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(req.user.id, workspace_id)
             if (!isMember) {
                 throw new ServerError(403, 'No tienes acceso a este workspace')
@@ -35,7 +34,7 @@ class ChannelController {
             })
 
         } catch (error) {
-            console.error(error)
+            console.error('Error en getAllByWorkspace:', error)
             return res.status(error.status || 500).json({
                 ok: false,
                 status: error.status || 500,
@@ -57,7 +56,6 @@ class ChannelController {
                 throw new ServerError(404, `No existe un canal con id ${channel_id}`)
             }
 
-            // Verificar que el usuario es miembro del workspace del canal
             const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(req.user.id, channel.workspace)
             if (!isMember) {
                 throw new ServerError(403, 'No tienes acceso a este canal')
@@ -71,7 +69,7 @@ class ChannelController {
             })
 
         } catch (error) {
-            console.error(error)
+            console.error('Error en getById:', error)
             return res.status(error.status || 500).json({
                 ok: false,
                 status: error.status || 500,
@@ -98,7 +96,6 @@ class ChannelController {
                 throw new ServerError(404, `No existe un workspace con id ${workspace_id}`)
             }
 
-            // Verificar que el usuario es miembro del workspace
             const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, workspace_id)
             if (!isMember) {
                 throw new ServerError(403, 'No tienes permisos para crear canales en este workspace')
@@ -107,7 +104,7 @@ class ChannelController {
             const newChannel = await ChannelRepository.createChannel({
                 name: name.trim(),
                 description: description?.trim() || '',
-                workspace_id,
+                workspace_id: workspace_id,
                 private: isPrivate || false
             })
 
@@ -118,7 +115,7 @@ class ChannelController {
                 data: { channel: newChannel }
             })
         } catch (error) {
-            console.error(error)
+            console.error('Error en post (create channel):', error)
             return res.status(error.status || 500).json({
                 ok: false,
                 status: error.status || 500,
@@ -142,13 +139,11 @@ class ChannelController {
                 throw new ServerError(404, `No existe un canal con id ${channel_id}`)
             }
 
-            // Verificar que el usuario es miembro del workspace del canal
             const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, channel.workspace)
             if (!isMember) {
                 throw new ServerError(403, 'No tienes permisos para editar este canal')
             }
 
-            // Validar campos a actualizar
             if (name && (typeof name !== 'string' || name.trim() === '' || name.length > 30)) {
                 throw new ServerError(400, "El campo 'name' debe ser un string no vacío de menos de 30 caracteres")
             }
@@ -168,7 +163,7 @@ class ChannelController {
             })
 
         } catch (error) {
-            console.error(error)
+            console.error('Error en update:', error)
             return res.status(error.status || 500).json({
                 ok: false,
                 status: error.status || 500,
@@ -191,7 +186,6 @@ class ChannelController {
                 throw new ServerError(404, `No existe un canal con id ${channel_id}`)
             }
 
-            // Verificar que el usuario es miembro del workspace del canal
             const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, channel.workspace)
             if (!isMember) {
                 throw new ServerError(403, 'No tienes permisos para eliminar este canal')
@@ -207,7 +201,7 @@ class ChannelController {
             })
 
         } catch (error) {
-            console.error(error)
+            console.error('Error en delete:', error)
             return res.status(error.status || 500).json({
                 ok: false,
                 status: error.status || 500,

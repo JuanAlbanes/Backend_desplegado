@@ -1,8 +1,17 @@
 import ChannelModel from "../models/Channel.model.js"
+import mongoose from "mongoose"
 
 class ChannelRepository {
     static async getAllByWorkspace(workspace_id) {
-        return await ChannelModel.find({ workspace: workspace_id }).populate('workspace')
+        let workspaceObjectId
+        try {
+            workspaceObjectId = new mongoose.Types.ObjectId(workspace_id)
+        } catch (error) {
+            throw new Error(`ID de workspace inválido: ${workspace_id}`)
+        }
+        
+        const channels = await ChannelModel.find({ workspace: workspaceObjectId }).populate('workspace')
+        return channels
     }
 
     static async getById(channel_id) {
@@ -10,12 +19,20 @@ class ChannelRepository {
     }
 
     static async createChannel({ name, description, workspace_id, private: isPrivate = false }) {
+        let workspaceObjectId
+        try {
+            workspaceObjectId = new mongoose.Types.ObjectId(workspace_id)
+        } catch (error) {
+            throw new Error(`ID de workspace inválido: ${workspace_id}`)
+        }
+
         const channel = new ChannelModel({
             name,
             description,
-            workspace: workspace_id,
+            workspace: workspaceObjectId,
             private: isPrivate
         })
+        
         await channel.save()
         return channel
     }
