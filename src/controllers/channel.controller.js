@@ -1,36 +1,17 @@
-import ChannelRepository from "../repositories/channel.repository.js"
-import WorkspaceRepository from "../repositories/workspace.repository.js"
-import MemberWorkspaceRepository from "../repositories/memberWorkspace.repository.js"
+import ChannelService from '../services/channel.service.js'
 import { ServerError } from "../utils/customError.utils.js"
-import { validarId } from "../utils/validations.utils.js"
 
 class ChannelController {
-
     static async getAllByWorkspace(req, res) {
         try {
             const { workspace_id } = req.params
-
-            if (!validarId(workspace_id)) {
-                throw new ServerError(400, 'El workspace_id debe ser un ID válido')
-            }
-
-            const workspace = await WorkspaceRepository.getById(workspace_id)
-            if (!workspace) {
-                throw new ServerError(404, `No existe un workspace con id ${workspace_id}`)
-            }
-
-            const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(req.user.id, workspace_id)
-            if (!isMember) {
-                throw new ServerError(403, 'No tienes acceso a este workspace')
-            }
-
-            const channels = await ChannelRepository.getAllByWorkspace(workspace_id)
+            const result = await ChannelService.getWorkspaceChannels(workspace_id, req.user.id)
 
             return res.status(200).json({
                 ok: true,
                 status: 200,
-                message: `Canales del workspace ${workspace.name} obtenidos correctamente`,
-                data: { channels }
+                message: `Canales del workspace ${result.workspaceName} obtenidos correctamente`,
+                data: { channels: result.channels }
             })
 
         } catch (error) {
@@ -46,20 +27,7 @@ class ChannelController {
     static async getById(req, res) {
         try {
             const { channel_id } = req.params
-
-            if (!validarId(channel_id)) {
-                throw new ServerError(400, 'El channel_id debe ser un ID válido')
-            }
-
-            const channel = await ChannelRepository.getById(channel_id)
-            if (!channel) {
-                throw new ServerError(404, `No existe un canal con id ${channel_id}`)
-            }
-
-            const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(req.user.id, channel.workspace)
-            if (!isMember) {
-                throw new ServerError(403, 'No tienes acceso a este canal')
-            }
+            const channel = await ChannelService.getChannelById(channel_id, req.user.id)
 
             return res.status(200).json({
                 ok: true,
@@ -80,39 +48,13 @@ class ChannelController {
 
     static async post(req, res) {
         try {
-            const { name, description, workspace_id, private: isPrivate } = req.body
-            const user_id = req.user.id
-
-            if (!name || typeof name !== 'string' || name.trim() === '' || name.length > 30) {
-                throw new ServerError(400, "El campo 'name' debe ser un string no vacío de menos de 30 caracteres")
-            }
-
-            if (!workspace_id || !validarId(workspace_id)) {
-                throw new ServerError(400, "Debe enviarse un 'workspace_id' válido")
-            }
-
-            const workspace = await WorkspaceRepository.getById(workspace_id)
-            if (!workspace) {
-                throw new ServerError(404, `No existe un workspace con id ${workspace_id}`)
-            }
-
-            const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, workspace_id)
-            if (!isMember) {
-                throw new ServerError(403, 'No tienes permisos para crear canales en este workspace')
-            }
-
-            const newChannel = await ChannelRepository.createChannel({
-                name: name.trim(),
-                description: description?.trim() || '',
-                workspace_id: workspace_id,
-                private: isPrivate || false
-            })
+            const result = await ChannelService.createChannel(req.body, req.user.id)
 
             return res.status(201).json({
                 ok: true,
                 status: 201,
-                message: `Canal '${newChannel.name}' creado correctamente en el workspace ${workspace.name}`,
-                data: { channel: newChannel }
+                message: `Canal '${result.channel.name}' creado correctamente en el workspace ${result.workspaceName}`,
+                data: { channel: result.channel }
             })
         } catch (error) {
             console.error('Error en post (create channel):', error)
@@ -127,33 +69,7 @@ class ChannelController {
     static async update(req, res) {
         try {
             const { channel_id } = req.params
-            const { name, description, private: isPrivate } = req.body
-            const user_id = req.user.id
-
-            if (!validarId(channel_id)) {
-                throw new ServerError(400, 'El channel_id debe ser un ID válido')
-            }
-
-            const channel = await ChannelRepository.getById(channel_id)
-            if (!channel) {
-                throw new ServerError(404, `No existe un canal con id ${channel_id}`)
-            }
-
-            const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, channel.workspace)
-            if (!isMember) {
-                throw new ServerError(403, 'No tienes permisos para editar este canal')
-            }
-
-            if (name && (typeof name !== 'string' || name.trim() === '' || name.length > 30)) {
-                throw new ServerError(400, "El campo 'name' debe ser un string no vacío de menos de 30 caracteres")
-            }
-
-            const updatedChannel = await ChannelRepository.update(channel_id, {
-                name: name?.trim(),
-                description: description?.trim(),
-                private: isPrivate,
-                modified_at: new Date()
-            })
+            const updatedChannel = await ChannelService.updateChannel(channel_id, req.body, req.user.id)
 
             return res.status(200).json({
                 ok: true,
@@ -175,23 +91,7 @@ class ChannelController {
     static async delete(req, res) {
         try {
             const { channel_id } = req.params
-            const user_id = req.user.id
-
-            if (!validarId(channel_id)) {
-                throw new ServerError(400, 'El channel_id debe ser un ID válido')
-            }
-
-            const channel = await ChannelRepository.getById(channel_id)
-            if (!channel) {
-                throw new ServerError(404, `No existe un canal con id ${channel_id}`)
-            }
-
-            const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_id, channel.workspace)
-            if (!isMember) {
-                throw new ServerError(403, 'No tienes permisos para eliminar este canal')
-            }
-
-            const deletedChannel = await ChannelRepository.delete(channel_id)
+            const deletedChannel = await ChannelService.deleteChannel(channel_id, req.user.id)
 
             return res.status(200).json({
                 ok: true,

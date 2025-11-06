@@ -1,42 +1,49 @@
-import jwt from 'jsonwebtoken'
-import ENVIRONMENT from '../config/environment.config.js'
+import MemberService from '../services/member.service.js'
 import { ServerError } from '../utils/customError.utils.js'
-import MemberWorkspaceRepository from '../repositories/memberWorkspace.repository.js'
+import jwt from 'jsonwebtoken'
 
 class MemberController {
     static async confirmInvitation(request, response) {
         try {
             const { token } = request.params
-            const {
-                id_invited,
-                email_invited,
-                id_workspace,
-                id_inviter
-            } = jwt.verify(token, ENVIRONMENT.JWT_SECRET_KEY)
-            console.log(id_invited,email_invited,id_workspace,id_inviter)
-
-            await MemberWorkspaceRepository.create(id_invited, id_workspace, 'user')
-
-            response.redirect(`${ENVIRONMENT.URL_FRONTEND}/register`) 
+            
+            const result = await MemberService.confirmInvitation(token)
+            
+            response.redirect(result.redirectUrl) 
         }
         catch (error) {
-            console.log(error)
-            if(error instanceof jwt.JsonWebTokenError) {
-                response.status(400).json({ ok: false, status: 400, message: 'Token invalido' })
+            console.log('Error en MemberController.confirmInvitation:', error)
+            
+            if (error instanceof jwt.JsonWebTokenError) {
+                response.status(400).json({ 
+                    ok: false, 
+                    status: 400, 
+                    message: 'Token invalido' 
+                })
             }
-            else if( error instanceof jwt.TokenExpiredError) {
-                response.status(400).json({ ok: false, status: 400, message: 'Token expirado' })
+            else if (error instanceof jwt.TokenExpiredError) {
+                response.status(400).json({ 
+                    ok: false, 
+                    status: 400, 
+                    message: 'Token expirado' 
+                })
             }
-            else if( error.status ){
-                response.status(error.status).json({ ok: false, status: error.status, message: error.message })
+            else if (error.status) {
+                response.status(error.status).json({ 
+                    ok: false, 
+                    status: error.status, 
+                    message: error.message 
+                })
             }
             else {
-                response.status(500).json({ ok: false, status: 500, message: 'Error interno del servidor' })
+                response.status(500).json({ 
+                    ok: false, 
+                    status: 500, 
+                    message: 'Error interno del servidor' 
+                })
             }
         }
     }
 }
 
 export default MemberController
-
-
