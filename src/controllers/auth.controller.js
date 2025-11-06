@@ -180,6 +180,47 @@ class AuthController {
             }
         }
     }
+
+    static async getCurrentUser(request, response) {
+        try {
+            // El usuario ya está disponible en request.user gracias al middleware
+            const userData = request.user;
+
+            if (!userData) {
+                throw new ServerError(401, 'Usuario no autenticado');
+            }
+
+            return response.json({
+                ok: true,
+                status: 200,
+                message: 'Usuario obtenido correctamente',
+                data: {
+                    user: userData
+                }
+            });
+        }
+        catch (error) {
+            console.log('Error en AuthController.getCurrentUser:', error);
+            if (error.status) {
+                return response.status(error.status).json(
+                    {
+                        ok: false,
+                        status: error.status,
+                        message: error.message
+                    }
+                );
+            }
+            else {
+                return response.status(500).json(
+                    {
+                        ok: false,
+                        status: 500,
+                        message: 'Error interno del servidor'
+                    }
+                );
+            }
+        }
+    }
 }
 
 export default AuthController
