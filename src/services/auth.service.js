@@ -4,10 +4,11 @@ import bcrypt from 'bcrypt'
 import transporter from "../config/mailer.config.js"
 import jwt from 'jsonwebtoken'
 import ENVIRONMENT from "../config/environment.config.js"
+import WorkspaceService from "../services/workspace.service.js" 
 
 class AuthService{
-    static async register(username, password, email){
-        console.log(username, password, email)
+    static async register(username, password, email, invitationWorkspaceId = null){ 
+        console.log('📝 Registrando usuario:', { username, email, invitationWorkspaceId })
         
         const user_found = await UserRepository.getByEmail(email)
         if(user_found){
@@ -17,6 +18,16 @@ class AuthService{
         const password_hashed = await bcrypt.hash(password,12) 
 
         const user_created = await UserRepository.createUser(username, email, password_hashed)
+
+        if (invitationWorkspaceId) {
+            try {
+                console.log(`🎯 Agregando usuario a workspace de invitación: ${invitationWorkspaceId}`)
+                await WorkspaceService.addUserToWorkspace(invitationWorkspaceId, user_created._id)
+                console.log('✅ Usuario agregado exitosamente al workspace')
+            } catch (workspaceError) {
+                console.error('❌ Error al agregar usuario al workspace:', workspaceError)
+            }
+        }
 
         const verification_token = jwt.sign(
             {

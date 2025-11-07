@@ -1,6 +1,7 @@
 import AuthService from "../services/auth.service.js"
 import { ServerError } from "../utils/customError.utils.js"
 import ENVIRONMENT from "../config/environment.config.js"
+import WorkspaceService from "../services/workspace.service.js"
 
 class AuthController {
     static async register(request, response) {
@@ -8,7 +9,8 @@ class AuthController {
             const {
                 username, 
                 email, 
-                password
+                password,
+                invitationWorkspaceId  
             } = request.body
             console.log('Register request body:', request.body)
 
@@ -30,7 +32,8 @@ class AuthController {
                     'Debes enviar una contraseña valida'
                 )
             }
-            await AuthService.register(username, password, email)
+            
+            await AuthService.register(username, password, email, invitationWorkspaceId)
 
             response.json({
                 ok: true,
