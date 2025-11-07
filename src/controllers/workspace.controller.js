@@ -223,15 +223,24 @@ class WorkspaceController {
 
     static async inviteMember(request, response) {
         try {
-            const { member, workspace, user } = request
             const { invited_email } = request.body
+            
+            // ✅ CORREGIDO: Usar los datos que YA vienen del middleware
+            const { workspace, member, user } = request
 
+            // ✅ CORREGIDO: Validar que el email esté presente
+            if (!invited_email || typeof invited_email !== 'string') {
+                throw new ServerError(400, 'El campo invited_email es requerido y debe ser un string válido')
+            }
+
+            console.log(`📨 Recibida invitación para: ${invited_email} en workspace: ${workspace._id}`)
+            
             await WorkspaceService.inviteMemberToWorkspace(workspace, user, member, invited_email)
 
             response.status(200).json({
                 ok: true,
                 status: 200,
-                message:'Usuario invitado con exito',
+                message: 'Usuario invitado con éxito',
                 data: null
             })
         }
