@@ -21,7 +21,7 @@ class MemberService {
 
             return { 
                 success: true, 
-                redirectUrl: `${ENVIRONMENT.URL_FRONTEND}/register` 
+                redirectUrl: `${ENVIRONMENT.URL_FRONTEND}//login?invitation=success&workspace_id=${id_workspace}&email=${encodeURIComponent(email_invited)}` 
             }
         } catch (error) {
             console.error('Error en MemberService.confirmInvitation:', error)
