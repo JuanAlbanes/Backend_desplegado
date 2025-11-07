@@ -36,11 +36,10 @@ const channelSchema = new mongoose.Schema({
     }
 })
 
-// Índices para mejor performance
-channelSchema.index({ workspace: 1, name: 1 }, { unique: true }) // Nombre único por workspace
-channelSchema.index({ workspace: 1, active: 1 }) // Búsqueda por workspace y estado
 
-// Middleware para actualizar modified_at antes de guardar
+channelSchema.index({ workspace: 1, name: 1 }, { unique: true })
+channelSchema.index({ workspace: 1, active: 1 }) 
+
 channelSchema.pre('save', function(next) {
     if (this.isModified()) {
         this.modified_at = new Date()

@@ -65,14 +65,12 @@ class AuthController {
         try{
             const {email, password} = request.body
             
-            // ✅ CORREGIDO: Validar campos requeridos
             if (!email || !password) {
                 throw new ServerError(400, 'Email y contraseña son requeridos')
             }
             
             const { authorization_token } = await AuthService.login(email, password)
             
-            // ✅ CORREGIDO: Verificar que el token se generó correctamente
             if (!authorization_token) {
                 throw new ServerError(500, 'Error al generar el token de autorización')
             }
@@ -142,7 +140,6 @@ class AuthController {
         try{
             const { email, newPassword } = request.body
 
-            // Validaciones
             if(!email || !String(email).toLowerCase().match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)){
                 throw new ServerError(400, 'Debes enviar un email válido')
             }
@@ -183,7 +180,6 @@ class AuthController {
 
     static async getCurrentUser(request, response) {
         try {
-            // El usuario ya está disponible en request.user gracias al middleware
             const userData = request.user;
 
             if (!userData) {

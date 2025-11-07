@@ -18,7 +18,6 @@ class ChannelRepository {
         return await ChannelModel.findById(channel_id).populate('workspace')
     }
 
-    // ✅ NUEVO MÉTODO: Verificar que el canal pertenece al workspace
     static async getByIdAndWorkspaceId(channel_id, workspace_id) {
         let channelObjectId, workspaceObjectId
         

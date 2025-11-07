@@ -8,7 +8,6 @@ const ENVIRONMENT = {
     JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
     URL_API_BACKEND: process.env.URL_API_BACKEND,
     URL_FRONTEND: process.env.URL_FRONTEND,
-   /*  URL_API: process.env.URL_API_BACKEND */ // Agregar esto en mi .env (RECORDARRRRR)
 }
 
 export default ENVIRONMENT

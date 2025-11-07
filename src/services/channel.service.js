@@ -45,7 +45,6 @@ class ChannelService {
     static async createChannel(channelData, userId) {
         const { name, description, workspace_id, private: isPrivate } = channelData
 
-        // Validaciones
         if (!name || typeof name !== 'string' || name.trim() === '' || name.length > 30) {
             throw new ServerError(400, "El campo 'name' debe ser un string no vacío de menos de 30 caracteres")
         }
@@ -89,7 +88,6 @@ class ChannelService {
             throw new ServerError(403, 'No tienes permisos para editar este canal')
         }
 
-        // Validar nombre si se está actualizando
         if (updates.name && (typeof updates.name !== 'string' || updates.name.trim() === '' || updates.name.length > 30)) {
             throw new ServerError(400, "El campo 'name' debe ser un string no vacío de menos de 30 caracteres")
         }
@@ -99,7 +97,6 @@ class ChannelService {
             modified_at: new Date()
         }
 
-        // Limpiar datos undefined
         Object.keys(updateData).forEach(key => {
             if (updateData[key] === undefined) {
                 delete updateData[key]

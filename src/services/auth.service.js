@@ -91,26 +91,20 @@ class AuthService{
     }
 
     static async resetPassword(email, newPassword) {
-        // Validar que el usuario existe
         const user = await UserRepository.getByEmail(email)
         if(!user){
             throw new ServerError(404, 'Email no registrado')
         }
-
-        // Validar que el email esté verificado
         if(!user.verified_email){
             throw new ServerError(401, 'Debes verificar tu email antes de reestablecer la contraseña')
         }
 
-        // Validar longitud de contraseña
         if(!newPassword || newPassword.length < 8){
             throw new ServerError(400, 'La contraseña debe tener al menos 8 caracteres')
         }
 
-        // Hashear nueva contraseña
         const newPasswordHashed = await bcrypt.hash(newPassword, 12)
 
-        // Actualizar contraseña en la base de datos
         await UserRepository.updatePassword(email, newPasswordHashed)
 
         await transporter.sendMail({

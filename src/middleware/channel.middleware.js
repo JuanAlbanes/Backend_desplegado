@@ -6,12 +6,10 @@ async function channelMiddleware(request, response, next) {
     try {
         const { channel_id, workspace_id } = request.params;
         
-        // Validar IDs
         if (!validarId(channel_id) || !validarId(workspace_id)) {
             throw new ServerError(400, 'Los parámetros channel_id y workspace_id deben ser IDs válidos');
         }
 
-        // Verificar que el canal existe y pertenece al workspace
         const channel_selected = await ChannelRepository.getByIdAndWorkspaceId(channel_id, workspace_id);
         
         if (!channel_selected) {

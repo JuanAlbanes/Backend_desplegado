@@ -12,7 +12,6 @@ class MemberWorkspaceRepository {
             })
             .exec();
 
-        // ✅ CORREGIDO: Filtrar workspaces que existen (no null) y retornar
         const validWorkspaces = workspaces_que_soy_miembro.filter(member => member.workspace !== null);
         
         console.log('Workspaces del usuario:', validWorkspaces);
@@ -34,7 +33,6 @@ class MemberWorkspaceRepository {
             throw new ServerError(400, 'El usuario ya es miembro del workspace');
         }
         
-        // ✅ CORREGIDO: Usar create() en lugar de insertOne()
         const newMember = await MemberWorkspace.create({
             user: user_id,
             workspace: workspace_id,

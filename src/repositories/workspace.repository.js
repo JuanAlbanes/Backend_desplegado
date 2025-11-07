@@ -57,7 +57,6 @@ class WorkspacesRepository {
 
     static async delete(workspace_id) {
         try {
-            // ✅ CORREGIDO: Usar DELETE REAL en lugar de soft delete
             const workspace_deleted = await Workspaces.findByIdAndDelete(workspace_id)
             return workspace_deleted
         } catch (error) {
@@ -68,7 +67,6 @@ class WorkspacesRepository {
 
     static async deleteById(workspaces_id) {
         try {
-            // ✅ CORREGIDO: Usar DELETE REAL en lugar de soft delete
             const workspace_deleted = await Workspaces.findByIdAndDelete(workspaces_id)
             return workspace_deleted
         } catch (error) {
@@ -96,7 +94,6 @@ class WorkspacesRepository {
         }
     }
 
-    // ✅ AÑADIDO: Método para obtener workspaces por admin
     static async getByAdminId(admin_id) {
         try {
             const workspaces = await Workspaces.find({ 
@@ -110,7 +107,6 @@ class WorkspacesRepository {
         }
     }
 
-    // ✅ AÑADIDO: Método para soft delete (si lo necesitas en el futuro)
     static async softDelete(workspace_id) {
         try {
             const workspace_updated = await Workspaces.findByIdAndUpdate(

@@ -38,17 +38,14 @@ class WorkspaceService {
     }
 
     static async createWorkspace(name, url_image, userId) {
-        // Validar name
         if (!name || typeof (name) !== 'string' || name.length > 30) {
             throw new ServerError(400, "el campo 'name' debe ser un string de menos de 30 caracteres")
         }
         
-        // Validar url_image
         if (url_image && typeof (url_image) !== 'string') {
             throw new ServerError(400, "el campo 'url_image' debe ser un string")
         }
         
-        // Crear el workspace
         const workspace_id_created = await WorkspacesRepository.createWorkspace(name, url_image, userId)
         
         console.log("Workspace creado con ID:", workspace_id_created)
@@ -57,7 +54,6 @@ class WorkspaceService {
             throw new ServerError(500, 'Error al crear el workspace')
         }
         
-        // Agregar usuario como admin
         const memberCreated = await MemberWorkspaceRepository.create(userId, workspace_id_created, 'admin')
         
         if (!memberCreated) {
@@ -72,14 +68,12 @@ class WorkspaceService {
             throw new ServerError(400, 'el workspace_id debe ser un id valido')
         }
 
-        // Verificar que el usuario es admin del workspace
         const member = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(userId, workspaceId)
         
         if (!member || member.role !== 'admin') {
             throw new ServerError(403, 'No tienes permisos para actualizar este workspace')
         }
 
-        // Validar campos
         if (updates.name && (typeof updates.name !== 'string' || updates.name.length > 30)) {
             throw new ServerError(400, "el campo 'name' debe ser un string de menos de 30 caracteres")
         }
@@ -102,7 +96,6 @@ class WorkspaceService {
             throw new ServerError(400, 'el workspace_id debe ser un id valido')
         }
 
-        // Verificar que el usuario es admin del workspace
         const member = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(userId, workspaceId)
         
         if (!member || member.role !== 'admin') {
@@ -120,7 +113,6 @@ class WorkspaceService {
 
     static async inviteMemberToWorkspace(workspace, user, member, invitedEmail) {
         try {
-            // ✅ CORREGIDO: Validar que el email no sea undefined
             if (!invitedEmail || typeof invitedEmail !== 'string') {
                 console.log('❌ Email inválido recibido:', invitedEmail)
                 throw new ServerError(400, 'El email de invitación es requerido y debe ser un string válido')
@@ -130,7 +122,6 @@ class WorkspaceService {
             
             console.log(`🔍 Buscando usuario con email: ${normalizedEmail}`)
             
-            // Buscar usuario por email
             const user_invited = await UserRepository.getByEmail(normalizedEmail)
 
             if (!user_invited) {
@@ -140,7 +131,6 @@ class WorkspaceService {
 
             console.log(`✅ Usuario encontrado: ${user_invited.name} (${user_invited._id})`)
             
-            // Verificar que NO es miembro actual de ese workspace 
             const member_data = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(
                 user_invited._id, workspace._id
             )
@@ -165,10 +155,8 @@ class WorkspaceService {
 
             console.log('📧 Enviando email de invitación...');
             
-            // Usar URL_FRONTEND para el enlace de confirmación
             const confirmationUrl = `${ENVIRONMENT.URL_FRONTEND}/confirm-invitation/${invite_token}`
             
-            // Enviar mail de invitacion al usuario invitado
             await transporter.sendMail(
                 {
                     from: ENVIRONMENT.GMAIL_USERNAME,
@@ -181,8 +169,8 @@ class WorkspaceService {
                             <h2 style="color: #1d1c1d;">${workspace.name}</h2>
                             <p>Para aceptar la invitación, haz clic en el siguiente enlace:</p>
                             <a href="${confirmationUrl}" 
-                               style="display: inline-block; padding: 12px 24px; background-color: #611f69; color: white; 
-                                      text-decoration: none; border-radius: 4px; font-weight: bold;">
+                            style="display: inline-block; padding: 12px 24px; background-color: #611f69; color: white; 
+                                text-decoration: none; border-radius: 4px; font-weight: bold;">
                                 Aceptar Invitación
                             </a>
                             <p style="margin-top: 20px; color: #616061; font-size: 12px;">

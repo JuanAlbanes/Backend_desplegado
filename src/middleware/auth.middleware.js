@@ -3,9 +3,6 @@ import { ServerError } from "../utils/customError.utils.js"
 import jwt from 'jsonwebtoken'
 
 const authMiddleware = (request, response, next) => {
-
-    //El token de authorizacion se suele pasar por header, especificamente por el header 'Authorization'
-    //Formato esperado 'Bearer token_value' 
     try{
         const authorization_header = request.headers.authorization
         if(!authorization_header){
@@ -18,7 +15,6 @@ const authMiddleware = (request, response, next) => {
 
         const user_data = jwt.verify(auth_token, ENVIRONMENT.JWT_SECRET_KEY)
 
-        //guardamos los datos del token en la request, cosa de que otros controladores puedan acceder a quien es
         request.user = user_data
         next()
     }

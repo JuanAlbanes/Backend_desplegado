@@ -15,7 +15,6 @@ class MessageService {
             throw new ServerError(404, `No existe un canal con id ${channelId}`)
         }
 
-        // Verificar que el usuario es miembro del workspace del canal
         const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(userId, channel.workspace)
         if (!isMember) {
             throw new ServerError(403, 'No tienes acceso a este canal')
@@ -35,7 +34,6 @@ class MessageService {
             throw new ServerError(404, `No existe un mensaje con id ${messageId}`)
         }
 
-        // Verificar que el usuario es miembro del workspace del canal del mensaje
         const channel = await ChannelRepository.getById(message.channel)
         const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(userId, channel.workspace)
         if (!isMember) {
@@ -61,7 +59,6 @@ class MessageService {
             throw new ServerError(404, `No existe un canal con id ${channel_id}`)
         }
 
-        // Verificar que el usuario es miembro del workspace del canal
         const isMember = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(userId, channel.workspace)
         if (!isMember) {
             throw new ServerError(403, 'No tienes permisos para enviar mensajes en este canal')
@@ -85,7 +82,6 @@ class MessageService {
             throw new ServerError(404, `No existe un mensaje con id ${messageId}`)
         }
 
-        // Verificar que el usuario es el autor del mensaje
         if (message.user.toString() !== userId) {
             throw new ServerError(403, 'Solo puedes editar tus propios mensajes')
         }
@@ -104,7 +100,6 @@ class MessageService {
             throw new ServerError(404, `No existe un mensaje con id ${messageId}`)
         }
 
-        // Verificar que el usuario es el autor del mensaje o admin del workspace
         const channel = await ChannelRepository.getById(message.channel)
         const member = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(userId, channel.workspace)
         
@@ -119,7 +114,6 @@ class MessageService {
         return deletedMessage
     }
 
-    // Método adicional para verificar permisos (reutilizable)
     static async checkMessageAccess(messageId, userId) {
         const message = await MessageRepository.getById(messageId)
         if (!message) {

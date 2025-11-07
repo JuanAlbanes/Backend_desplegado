@@ -225,10 +225,8 @@ class WorkspaceController {
         try {
             const { invited_email } = request.body
             
-            // ✅ CORREGIDO: Usar los datos que YA vienen del middleware
             const { workspace, member, user } = request
-
-            // ✅ CORREGIDO: Validar que el email esté presente
+            
             if (!invited_email || typeof invited_email !== 'string') {
                 throw new ServerError(400, 'El campo invited_email es requerido y debe ser un string válido')
             }
