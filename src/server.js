@@ -46,15 +46,17 @@ import connectMongoDB from "./config/mongoDB.config.js";
 import workspace_router from "./routes/workspace.route.js";
 import channel_router from "./routes/channel.router.js";
 import message_router from "./routes/messages.router.js";
+
+connectMongoDB()
+
 import express from 'express'
 import auth_router from "./routes/auth.router.js";
 import cors from 'cors'
 import authMiddleware from "./middleware/auth.middleware.js";
 import member_router from "./routes/member.router.js";
 
-connectMongoDB()
-
 const app = express()
+
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -64,6 +66,7 @@ const corsOptions = {
             'http://localhost:3000'
         ];
 
+        
         if (!origin) return callback(null, true);
 
         if (allowedOrigins.indexOf(origin) !== -1) {
@@ -79,6 +82,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
 
 app.use((req, res, next) => {
     const allowedOrigins = [
@@ -96,6 +100,7 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, PATCH, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, X-Requested-With, Accept');
 
+
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -106,7 +111,9 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+
 app.use('/api/auth', auth_router)
+
 
 app.use('/api/members', authMiddleware, member_router)
 app.use('/api/workspaces', authMiddleware, workspace_router)
@@ -128,6 +135,7 @@ app.get('/health', (req, res) => {
     });
 });
 
+
 app.get('/api/ruta-protegida', authMiddleware, (request, response) => {
     console.log(request.user)
     response.send({
@@ -136,6 +144,7 @@ app.get('/api/ruta-protegida', authMiddleware, (request, response) => {
         message: 'Ruta protegida funcionando'
     })
 })
+
 
 app.get('/', (req, res) => {
     res.json({
@@ -164,10 +173,11 @@ app.use((err, req, res, next) => {
 });
 
 
-app.use('*', (req, res) => {
+app.use((req, res) => {
     res.status(404).json({
         error: 'Route not found',
-        path: req.originalUrl
+        path: req.originalUrl,
+        method: req.method
     });
 });
 
