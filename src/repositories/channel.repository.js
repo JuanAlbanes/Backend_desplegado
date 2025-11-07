@@ -18,6 +18,25 @@ class ChannelRepository {
         return await ChannelModel.findById(channel_id).populate('workspace')
     }
 
+    // ✅ NUEVO MÉTODO: Verificar que el canal pertenece al workspace
+    static async getByIdAndWorkspaceId(channel_id, workspace_id) {
+        let channelObjectId, workspaceObjectId
+        
+        try {
+            channelObjectId = new mongoose.Types.ObjectId(channel_id)
+            workspaceObjectId = new mongoose.Types.ObjectId(workspace_id)
+        } catch (error) {
+            throw new Error(`IDs inválidos: channel_id=${channel_id}, workspace_id=${workspace_id}`)
+        }
+
+        const channel = await ChannelModel.findOne({
+            _id: channelObjectId,
+            workspace: workspaceObjectId
+        }).populate('workspace')
+        
+        return channel
+    }
+
     static async createChannel({ name, description, workspace_id, private: isPrivate = false }) {
         let workspaceObjectId
         try {

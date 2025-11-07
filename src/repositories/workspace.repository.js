@@ -57,15 +57,8 @@ class WorkspacesRepository {
 
     static async delete(workspace_id) {
         try {
-            // ✅ CORREGIDO: Usar soft delete cambiando active a false
-            const workspace_deleted = await Workspaces.findByIdAndUpdate(
-                workspace_id,
-                { 
-                    active: false,
-                    modified_at: new Date()
-                },
-                { new: true }
-            )
+            // ✅ CORREGIDO: Usar DELETE REAL en lugar de soft delete
+            const workspace_deleted = await Workspaces.findByIdAndDelete(workspace_id)
             return workspace_deleted
         } catch (error) {
             console.error('Error en delete:', error)
@@ -75,15 +68,9 @@ class WorkspacesRepository {
 
     static async deleteById(workspaces_id) {
         try {
-            // ✅ CORREGIDO: Usar soft delete en lugar de eliminar permanentemente
-            await Workspaces.findByIdAndUpdate(
-                workspaces_id,
-                { 
-                    active: false,
-                    modified_at: new Date()
-                }
-            )
-            return true
+            // ✅ CORREGIDO: Usar DELETE REAL en lugar de soft delete
+            const workspace_deleted = await Workspaces.findByIdAndDelete(workspaces_id)
+            return workspace_deleted
         } catch (error) {
             console.error('Error en deleteById:', error)
             throw error
@@ -119,6 +106,24 @@ class WorkspacesRepository {
             return workspaces
         } catch (error) {
             console.error('Error en getByAdminId:', error)
+            throw error
+        }
+    }
+
+    // ✅ AÑADIDO: Método para soft delete (si lo necesitas en el futuro)
+    static async softDelete(workspace_id) {
+        try {
+            const workspace_updated = await Workspaces.findByIdAndUpdate(
+                workspace_id,
+                { 
+                    active: false,
+                    modified_at: new Date()
+                },
+                { new: true }
+            )
+            return workspace_updated
+        } catch (error) {
+            console.error('Error en softDelete:', error)
             throw error
         }
     }
